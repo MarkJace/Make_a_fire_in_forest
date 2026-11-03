@@ -1,42 +1,10 @@
-# 林间火光 · Make a fire in forest
+# Make a fire in forest
 
-一个本地运行的二维森林起火小游戏。使用 Python 标准库 Tkinter，无需安装 pip 依赖。
+This is just a little game for relaxation
 
-## 运行
-
+## demo version
+to run this game:
 ```bash
 cd ~/repositories/Make_a_fire_in_forest
 ./proj_env/bin/python main.py
-```
-
-也可以先 `source proj_env/bin/activate`，再执行 `python main.py`。
-需要图形桌面环境；通过无图形转发的 SSH 终端运行无法显示窗口。
-
-## 操作
-
-- 点击绿色树木点火，拖动可以连续点火。
-- 点击“暂停 / 继续”或按空格控制模拟；暂停时也可以布置火点。
-- 调节模拟速度立即生效，范围为 0.25～4 倍。
-- 调整森林密度后，点击“新森林 / 重置”或按 R 生成新场景。
-- 右侧显示存活树木、燃烧数量、灰烬数量和烧毁比例。
-- 火熄灭后可点燃剩余树木，或重新开始。
-
-## 模拟规则
-
-森林由 100 × 100 格组成，状态包括空地、树木、燃烧中和灰烬。
-每步燃烧格尝试引燃八邻域树木，每次尝试概率为 22%；燃烧持续 7 步。
-采用同步更新，新燃烧格从下一步开始传播，边界不循环连接。
-1 倍速度目标为每步 120 毫秒，实际速度受设备绘图性能影响。
-烧毁比例为灰烬数除以初始树木数，不包含仍在燃烧的树木。
-
-这是娱乐模拟，当前没有接入位置、天气或真实地理数据。
-
-## 文件与测试
-
-- `forest.py`：独立模拟核心，后续可增加风、湿度等参数。
-- `main.py`：Tkinter 界面与动画。
-- `test_forest.py`：边界、同步传播、燃烧结束及树木数量守恒测试。
-
-```bash
-./proj_env/bin/python -m unittest -v
 ```

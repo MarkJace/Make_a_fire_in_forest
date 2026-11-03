@@ -1,0 +1,5 @@
+# git ignore
+
+proj_env/
+develop_plan.md
+__pycache__/

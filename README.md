@@ -1,4 +1,4 @@
-# Forest Fire
+# Make a Fire in Forest
 
 An English-language desktop game that turns real land-cover data around a selected city into a playable map. Forests, ground, water and built-up areas retain their geographic arrangement. There is no density slider or randomly generated replacement map.
 

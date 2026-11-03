@@ -4,6 +4,13 @@ import math
 
 EMPTY, TREE, FIRE, ASH, WATER, CITY, UNKNOWN = range(7)
 
+# Gameplay tuning, not calibrated physical fire parameters.
+BASE_SPREAD_PROBABILITY = 0.22
+UPWIND_CUTOFF_MS = 8.0
+DOWNWIND_BOOST = 0.20
+PRECIPITATION_SUPPRESSION = 0.8
+PRECIPITATION_COOLING = 1.5
+
 
 class Forest:
     def __init__(self, size=100, density=0.65, seed=None, terrain=None):
@@ -40,9 +47,18 @@ class Forest:
             angle = math.radians(self.wind_direction)
             # Rows grow southward. A north wind blows towards positive rows.
             alignment = (dr * math.cos(angle) - dc * math.sin(angle)) / math.hypot(dr, dc)
-        wind_factor = 1 + 0.12 * self.wind_speed * (1 + 0.8 * alignment)
-        wet_factor = 1 + 0.7 * self.precipitation_rate
-        return 1 - (1 - 0.22) ** (wind_factor / wet_factor)
+        # Project wind onto the attempted spread direction. Crosswind and
+        # missing direction use the calm baseline; never invent a wind bearing.
+        along_wind = self.wind_speed * alignment
+        if abs(along_wind) < 1e-12:
+            along_wind = 0.0
+        if along_wind < 0:
+            wind_factor = max(0.0, 1 + along_wind / UPWIND_CUTOFF_MS) ** 2
+        else:
+            wind_factor = 1 + DOWNWIND_BOOST * along_wind
+        dry_probability = 1 - (1 - BASE_SPREAD_PROBABILITY) ** wind_factor
+        # Apply wetness after wind so even strong wind cannot erase suppression.
+        return dry_probability * math.exp(-PRECIPITATION_SUPPRESSION * self.precipitation_rate)
 
     def ignite(self, row, col):
         if not (0 <= row < self.size and 0 <= col < self.size):
@@ -62,7 +78,7 @@ class Forest:
             if state != FIRE:
                 continue
             # Rain/snow act before spread, so extinguished cells cannot ignite neighbors.
-            ages[index] -= 0.7 * self.precipitation_rate
+            ages[index] -= PRECIPITATION_COOLING * self.precipitation_rate
             if ages[index] <= 0:
                 cells[index], ages[index] = ASH, 0
                 changed.add(index)

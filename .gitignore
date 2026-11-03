@@ -3,3 +3,6 @@
 proj_env/
 develop_plan.md
 __pycache__/
+
+# Local test scripts
+/tests/

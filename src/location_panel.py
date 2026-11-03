@@ -10,8 +10,9 @@ from weather import WeatherError, fetch_weather, format_weather, locate_ip, sear
 
 
 class LocationPanel(tk.Frame):
-    def __init__(self, parent, auto_start=True, on_weather=None, on_coverage=None):
+    def __init__(self, parent, auto_start=True, on_weather=None, on_coverage=None, on_location=None):
         super().__init__(parent, bg='#1b2b24')
+        self.on_location = on_location or (lambda location: None)
         self.on_weather = on_weather or (lambda data: None)
         self.results = queue.Queue()
         self.generation = 0
@@ -77,6 +78,9 @@ class LocationPanel(tk.Frame):
         if self.auto_id:
             self.after_cancel(self.auto_id)
         self.auto_id = None
+        self.location = None
+        self.place_text.set('Locating…')
+        self.on_location(None)
         self.on_weather(None)
         self.coverage_panel.set_location(None)
         self.generation += 1
@@ -112,6 +116,7 @@ class LocationPanel(tk.Frame):
 
     def set_location(self, location, source):
         self.location = location
+        self.on_location(location)
         self.coverage_panel.set_location(location)
         self.place_text.set(f'{location.name}\n{location.latitude:.4f}, {location.longitude:.4f} · {source}')
         self.auto_button.configure(state='normal')
@@ -147,6 +152,9 @@ class LocationPanel(tk.Frame):
                                                      else 'No cities found. Try another name or spelling.'))
                 elif token == self.generation:
                     if error:
+                        if kind == 'location':
+                            self.on_location(None)
+                            self.place_text.set('No location selected')
                         self.notice.set(error + (' You can search for a city manually.' if kind == 'location' else ' Click Refresh Weather to retry.'))
                         self.weather_text.set('No weather data')
                         self.on_weather(None)

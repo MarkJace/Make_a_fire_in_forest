@@ -214,61 +214,7 @@ fire_affected_area_km2 = (burning_cells + ash_cells) * cell_area_km2
 
 当前会话最多缓存 16 组位置与地图范围组合。目前尚未提供持久化离线地图缓存。
 
-## 打包 Windows 可执行文件
 
-请**在 Windows 上**构建 Windows 可执行文件。PyInstaller 不是交叉编译器：Linux 上的构建不会生成 Windows 可执行文件。详见 [PyInstaller 运行模式文档](https://pyinstaller.org/en/stable/operating-mode.html)。
-
-以下命令假设前文的 Windows `.venv` 环境已经准备好，且源码程序可以正常运行。不要复用从 Linux 复制过来的虚拟环境。
-
-### 安装打包工具
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install pyinstaller pyinstaller-hooks-contrib
-```
-
-### 构建文件夹形式的发布版本
-
-建议先使用此模式，便于测试和排查问题：
-
-```powershell
-.\.venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --onedir --windowed --name MakeAFireInForest --paths src --collect-all rasterio src/main.py
-```
-
-预期输出：
-
-```text
-dist/
-└── MakeAFireInForest/
-    ├── MakeAFireInForest.exe
-    └── _internal/
-```
-
-请分发**整个** `dist/MakeAFireInForest/` 文件夹，例如将其压缩为 ZIP。在此模式下，仅提供可执行文件是不够的。
-
-`--collect-all rasterio` 显式收集 Rasterio 的子模块、数据和二进制文件。参数详情见 [PyInstaller 使用文档](https://pyinstaller.org/en/stable/usage.html)。
-
-### 可选：构建单文件版本
-
-验证文件夹版本正常后，可执行：
-
-```powershell
-.\.venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --onefile --windowed --name MakeAFireInForest --paths src --collect-all rasterio src/main.py
-```
-
-输出文件为 `dist/MakeAFireInForest.exe`。单文件版本启动时会解压依赖，因此可能启动较慢，尤其是在包含 Rasterio/GDAL 的情况下。
-
-### 验证打包结果
-
-在未安装 Python 的 Windows 电脑上测试：
-
-- 启动程序并调整窗口大小。
-- 搜索城市并加载地形。
-- 刷新天气、更换地图范围。
-- 点火、暂停、继续和重置。
-- 切换天气特效档位。
-- 保存截图，检查文字和地图标识。
-
-如果程序直接退出且没有有效错误信息，可将 `--windowed` 替换为 `--console` 重新打包，再从 PowerShell 启动以查看异常堆栈。上述命令是构建起点，生成的 Windows 发布版本仍需在目标系统上验证。
 
 ## 项目结构
 
@@ -285,28 +231,11 @@ Make_a_fire_in_forest/
 │   ├── map_renderer.py      # 栅格地图渲染
 │   ├── weather_effects.py   # 动态雨雪效果
 │   └── screenshot.py        # PNG 地图导出
-├── tests/                   # 本地测试；由 Git 忽略
 ├── docs/                    # 补充文档
 ├── requirements.txt
 └── README.md
 ```
 
-本地 `tests/` 目录未被 Git 跟踪，新克隆的仓库中不包含该目录。
-
-如果已有测试脚本，在项目根目录执行：
-
-**Linux**
-
-```bash
-PYTHONPATH=src ./proj_env/bin/python -B -m unittest discover -s tests -v
-```
-
-**Windows — PowerShell**
-
-```powershell
-$env:PYTHONPATH = "src"
-.\.venv\Scripts\python.exe -B -m unittest discover -s tests -v
-```
 
 ## 常见问题与限制
 

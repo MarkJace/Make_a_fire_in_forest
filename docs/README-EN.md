@@ -214,61 +214,6 @@ Maps cover a square around the selected coordinates, not an entire administrativ
 
 Successful maps are cached for up to 16 location/range combinations during the current session. The application does not currently maintain a persistent offline map cache.
 
-## Build a Windows Executable
-
-Build the Windows executable **on Windows**. PyInstaller is not a cross-compiler: a Linux build does not produce a Windows executable. See the [PyInstaller operating-mode documentation](https://pyinstaller.org/en/stable/operating-mode.html).
-
-The following commands assume the Windows `.venv` environment above is ready and that the source application runs successfully. Do not reuse a virtual environment copied from Linux.
-
-### Install packaging tools
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install pyinstaller pyinstaller-hooks-contrib
-```
-
-### Build a folder-based distribution
-
-Start with this mode to simplify testing and troubleshooting:
-
-```powershell
-.\.venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --onedir --windowed --name MakeAFireInForest --paths src --collect-all rasterio src/main.py
-```
-
-Expected output:
-
-```text
-dist/
-└── MakeAFireInForest/
-    ├── MakeAFireInForest.exe
-    └── _internal/
-```
-
-Distribute the **entire** `dist/MakeAFireInForest/` folder, for example as a ZIP archive. The executable alone is not sufficient in this mode.
-
-The `--collect-all rasterio` option explicitly collects Rasterio submodules, data, and binaries. Details of these options are available in the [PyInstaller usage documentation](https://pyinstaller.org/en/stable/usage.html).
-
-### Optional: build a single executable
-
-After validating the folder-based build:
-
-```powershell
-.\.venv\Scripts\python.exe -m PyInstaller --noconfirm --clean --onefile --windowed --name MakeAFireInForest --paths src --collect-all rasterio src/main.py
-```
-
-The output is `dist/MakeAFireInForest.exe`. A single-file build extracts bundled dependencies at startup and may start more slowly, particularly with Rasterio/GDAL included.
-
-### Validate the build
-
-Test on a Windows machine without Python installed:
-
-- Launch the application and resize the window.
-- Search for a city and load terrain.
-- Refresh weather and change map range.
-- Ignite, pause, resume, and reset a fire.
-- Switch between weather-effect modes.
-- Save a screenshot and inspect its text and overlays.
-
-If the executable closes without a useful error, rebuild with `--console` instead of `--windowed` and run it from PowerShell to inspect the traceback. These commands are a build starting point; the resulting Windows distribution still needs testing on the target system.
 
 ## Project Structure
 
@@ -285,28 +230,11 @@ Make_a_fire_in_forest/
 │   ├── map_renderer.py      # Raster map rendering
 │   ├── weather_effects.py   # Animated rain and snow
 │   └── screenshot.py        # PNG map export
-├── tests/                   # Local tests; ignored by Git
 ├── docs/                    # Additional documentation
 ├── requirements.txt
 └── README.md
 ```
 
-The local `tests/` directory is not tracked by Git and is not included in a fresh clone.
-
-If you have the tests, run them from the project root:
-
-**Linux**
-
-```bash
-PYTHONPATH=src ./proj_env/bin/python -B -m unittest discover -s tests -v
-```
-
-**Windows — PowerShell**
-
-```powershell
-$env:PYTHONPATH = "src"
-.\.venv\Scripts\python.exe -B -m unittest discover -s tests -v
-```
 
 ## Troubleshooting and Limitations
 
